@@ -9,10 +9,15 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("http://127.0.0.1:8000/api/v1/auth/register", {
+    if (!apiBaseUrl) {
+      setError("Missing NEXT_PUBLIC_API_BASE_URL in environment configuration");
+      return;
+    }
+    const res = await fetch(`${apiBaseUrl}/api/v1/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
