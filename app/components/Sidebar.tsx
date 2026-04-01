@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
@@ -16,8 +17,14 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-gray-800 text-white flex flex-col">
-      <div className="p-4 text-xl font-bold border-b border-gray-700">
-        InfraCore
+      <div className="p-4 border-b border-gray-700">
+        <Image
+          src="/infracore_logo.svg"
+          alt="InfraCore"
+          width={140}
+          height={28}
+          priority
+        />
       </div>
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
