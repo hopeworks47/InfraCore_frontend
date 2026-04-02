@@ -63,11 +63,11 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex h-screen w-20 flex-col bg-gray-800 text-white transition-all duration-200 ${
+      className={`flex h-screen w-20 flex-col bg-blue-950 text-white transition-all duration-200 ${
         isCollapsed ? "md:w-20" : "md:w-64"
       }`}
     >
-      <div className="flex items-center justify-center border-b border-gray-700 p-4 md:justify-between">
+      <div className="flex items-center justify-center border-b border-r border-gray-700 p-4 md:justify-between">
         <Image
           src="/mobile-logo.svg"
           alt="InfraCore"
@@ -120,8 +120,8 @@ export default function Sidebar() {
                   isCollapsed ? "justify-center md:justify-center" : "justify-center md:justify-start"
                 } ${
                   pathname === item.href
-                    ? "bg-gray-700"
-                    : "hover:bg-gray-700"
+                    ? "bg-blue-900/80"
+                    : "hover:bg-blue-900/80"
                 }`}
               >
                 {item.icon}

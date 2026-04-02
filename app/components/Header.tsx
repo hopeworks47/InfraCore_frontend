@@ -34,7 +34,7 @@ export default function Header({ userName, userEmail }: HeaderProps) {
   }, []);
 
   return (
-    <header className="flex items-center justify-between border-b border-gray-200 bg-gray-700 px-6 py-[14px]">
+    <header className="flex items-center justify-between border-b border-gray-200 bg-blue-950 px-6 py-[13px]">
       <div className="w-full max-w-md">
         <label htmlFor="dashboard-search" className="sr-only">
           Search
