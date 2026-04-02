@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 
 export default async function DashboardLayout({
   children,
@@ -14,9 +15,15 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header
+          userName={session.user?.name}
+          userEmail={session.user?.email}
+        />
+        <main className="flex-1 overflow-y-auto bg-slate-50 p-6">{children}</main>
+      </div>
     </div>
   );
 }
