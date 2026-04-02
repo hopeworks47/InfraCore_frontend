@@ -95,7 +95,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={() => setMobileOpen((value) => !value)}
-          className="hidden rounded-md p-2 text-white hover:bg-gray-700 md:inline-flex"
+          className="hidden rounded-md p-2 text-white hover:bg-blue-900/80 md:inline-flex"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
