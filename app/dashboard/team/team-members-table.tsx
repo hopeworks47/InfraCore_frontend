@@ -8,8 +8,7 @@ type TeamMember = {
   name?: string;
   email?: string;
   role?: "admin" | "leader" | "member";
-  joinedDate?: string;
-  createdAt?: string;
+  created_at?: string;
 };
 
 type TeamMembersTableProps = {
@@ -19,7 +18,7 @@ type TeamMembersTableProps = {
 const PAGE_SIZE = 5;
 
 function formatJoinedDate(member: TeamMember) {
-  const value = member.joinedDate ?? member.createdAt;
+  const value = member.created_at;
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
