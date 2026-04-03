@@ -18,13 +18,13 @@ export default function RegisterPage() {
     }
   }, [user, router])
   
-  const { values, errors, handleChange, handleSubmit, isSubmitting } = useForm({
+  const { values, errors, handleChange, handleFileChange, handleSubmit, isSubmitting } = useForm({
     initialValues: {
       email: '',
       password: '',
       name: '',
       role: 'member', // default
-      profileImage: '',
+      profileImage: null,
       birthdate: '',
     },
     validate: (values) => {
@@ -38,8 +38,17 @@ export default function RegisterPage() {
       }
       return errors;
     },
-    onSubmit: async (formValues) => {
-      await dispatch(registerUser(formValues));
+    onSubmit: async (formValues) => {        
+        const formData = new FormData();
+        formData.append('email', formValues.email);
+        formData.append('password', formValues.password);
+        formData.append('name', formValues.name);
+        formData.append('role', formValues.role);
+        if (formValues.birthdate) formData.append('birthdate', formValues.birthdate);
+        if (formValues.profileImage && (formValues.profileImage as any) instanceof File) {
+            formData.append('profile_image', formValues.profileImage);
+        }
+        await dispatch(registerUser(formData));
       // On success, Redux state will have user and redirect via useEffect
     },
   });
@@ -108,11 +117,10 @@ export default function RegisterPage() {
         <div>
           <label className="block text-sm font-medium text-gray-700">Profile Image URL</label>
           <input
-            type="text"
+            type="file"
             name="profileImage"
-            value={values.profileImage}
-            onChange={handleChange}
-            placeholder="https://example.com/avatar.jpg"
+            accept="image/*"
+            onChange={handleFileChange}            
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           />
         </div>

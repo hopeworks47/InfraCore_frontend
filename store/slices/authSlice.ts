@@ -6,7 +6,7 @@ interface User {
     email: string;
     name?: string;
     role: string;
-    profileImage?: string;
+    profileImage: File | null;
     birthDate?: string;
 }
 
@@ -43,32 +43,22 @@ export const loginUser = createAsyncThunk("auth/login", async ({ email, password
 
 export const registerUser = createAsyncThunk(
     'auth/register',
-    async (userData: {
-        email: string;
-        password: string;
-        name: string;
-        role: string;
-        profileImage?: string;
-        birthDate?: string;
-    }, { rejectWithValue }) => {
+    async (formData: FormData, { rejectWithValue }) => {        
         try {
             const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
             const res = await fetch(`${apiBaseUrl}/api/v1/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
+                method: 'POST',                
+                body: formData,
               });
               const data = await res.json();
               if (!res.ok) {
                 return rejectWithValue(data.detail || 'Registration failed');
               }
               // After registration, auto-login (optional)
-              await signIn('credentials', {
-                email: userData.email,
-                password: userData.password,
-                redirect: false,
-              });
-              return data; // contains user info
+              const email = formData.get('email') as string;
+              const password = formData.get('password') as string;
+              await signIn('credentials', { email, password, redirect: false });
+              return data;
         } catch (error) {
             return rejectWithValue('Network Error');
         }

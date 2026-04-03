@@ -42,12 +42,23 @@ export function useForm<T extends FormFields>({
     setIsSubmitting(false);
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      setValues((prev) => ({ ...prev, [name]: files?.[0] || null }));
+      if (errors[name as keyof T]) {
+        setErrors((prev) => ({ ...prev, [name]: undefined }));
+      }
+    }
+  };
+
   return {
     values,
     errors,
     isSubmitting,
     handleChange,
     handleSubmit,
+    handleFileChange,
     setValues,
   };
 }
