@@ -18,10 +18,7 @@ export default async function DashboardLayout({
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header
-          userName={session.user?.name}
-          userEmail={session.user?.email}
-        />
+        <Header />
         <main className="flex-1 overflow-y-auto bg-slate-50 p-6">{children}</main>
       </div>
     </div>

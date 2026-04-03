@@ -1,20 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { fetchCurrentUser } from "@/store/slices/authSlice";
 
-type HeaderProps = {
-  userName?: string | null;
-  userEmail?: string | null;
-};
+export default function Header() {
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { data: session, status } = useSession();
 
-export default function Header({ userName, userEmail }: HeaderProps) {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const displayName = userName?.trim() || "User";
-  const initials = displayName.slice(0, 1).toUpperCase();
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.accessToken) {
+      dispatch(fetchCurrentUser());
+    }
+  }, [status, session, dispatch]);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -71,15 +78,26 @@ export default function Header({ userName, userEmail }: HeaderProps) {
         >
           <span className="hidden text-right md:block">
             <span className="block text-sm font-semibold text-blue-50">
-              {displayName}
+              {user && user.name ? user.name : "User"}
             </span>
             <span className="block text-xs text-blue-200/80">
-              {userEmail || "No email"}
+              {user && user.email ? user.email : "No Email"}
             </span>
           </span>
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-semibold text-blue-700 ring-1 ring-gray-300">
-            {initials}
-          </span>
+          {user && user.profileImage ? (
+            <Image
+              src={`${apiBaseUrl}${user.profileImage}`}
+              alt={user && user.name ? user.name : "User Avatar"}
+              width={36}
+              height={36}
+              className="rounded-full object-cover ring-1 ring-gray-300"
+              unoptimized
+            />
+          ) : (
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-semibold text-blue-700 ring-1 ring-gray-300">
+              User
+            </span>
+          )}
         </button>
 
         {isOpen ? (
