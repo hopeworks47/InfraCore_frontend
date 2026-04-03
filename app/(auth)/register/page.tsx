@@ -22,20 +22,22 @@ export default function RegisterPage() {
     initialValues: {
       email: '',
       password: '',
+      confirmPassword: '',
       name: '',
       role: 'member', // default
-      profileImage: null,
-      birthdate: '',
+      profileImage: null as File | null,
+      birthDate: '',
     },
     validate: (values) => {
-      const errors: any = {};
+      const errors: Partial<Record<keyof typeof values, string>> = {};
       if (!values.email) errors.email = 'Email is required';
       if (!values.password) errors.password = 'Password is required';
       if (values.password.length < 6) errors.password = 'Password must be at least 6 characters';
-      if (!values.name) errors.name = 'Name is required';
-      if (values.birthdate && !/^\d{4}-\d{2}-\d{2}$/.test(values.birthdate)) {
-        errors.birthdate = 'Invalid date format (YYYY-MM-DD)';
+      if (!values.confirmPassword) errors.confirmPassword = 'Confirm password is required';
+      if (values.password && values.confirmPassword && values.password !== values.confirmPassword) {
+        errors.confirmPassword = 'Passwords do not match';
       }
+      if (!values.name) errors.name = 'Name is required';
       return errors;
     },
     onSubmit: async (formValues) => {        
@@ -44,8 +46,8 @@ export default function RegisterPage() {
         formData.append('password', formValues.password);
         formData.append('name', formValues.name);
         formData.append('role', formValues.role);
-        if (formValues.birthdate) formData.append('birthdate', formValues.birthdate);
-        if (formValues.profileImage && (formValues.profileImage as any) instanceof File) {
+        if (formValues.birthDate) formData.append('birthDate', formValues.birthDate);
+        if (formValues.profileImage instanceof File) {
             formData.append('profile_image', formValues.profileImage);
         }
         await dispatch(registerUser(formData));
@@ -102,6 +104,19 @@ export default function RegisterPage() {
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
         </div>
         <div>
+          <label className="block text-sm font-medium text-gray-700">Confirm Password *</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={values.confirmPassword}
+            onChange={handleChange}
+            onFocus={handleInputFocus}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            required
+          />
+          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+        </div>
+        <div>
           <label className="block text-sm font-medium text-gray-700">Role</label>
           <select
             name="role"
@@ -115,7 +130,7 @@ export default function RegisterPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Profile Image URL</label>
+          <label className="block text-sm font-medium text-gray-700">Profile Image</label>
           <input
             type="file"
             name="profileImage"
@@ -125,16 +140,15 @@ export default function RegisterPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Birthdate (YYYY-MM-DD)</label>
+          <label className="block text-sm font-medium text-gray-700">Birthdate</label>
           <input
-            type="text"
-            name="birthdate"
-            value={values.birthdate}
+            type="date"
+            name="birthDate"
+            value={values.birthDate}
             onChange={handleChange}
-            placeholder="1990-01-01"
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           />
-          {errors.birthdate && <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>}
+          {errors.birthDate && <p className="text-red-500 text-sm mt-1">{errors.birthDate}</p>}
         </div>
         <button
           type="submit"
