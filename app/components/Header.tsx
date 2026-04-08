@@ -11,7 +11,7 @@ export default function Header() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const { data: session, status } = useSession();
-
+  console.log("Header session", session, "status", status);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [isOpen, setIsOpen] = useState(false);

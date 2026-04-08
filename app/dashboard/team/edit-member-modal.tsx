@@ -28,7 +28,7 @@ export default function EditMemberModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
         <h2 className="mb-4 text-lg font-semibold text-gray-800">Update Member</h2>
         <div className="space-y-3">
