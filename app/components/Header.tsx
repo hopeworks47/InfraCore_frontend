@@ -11,6 +11,7 @@ export default function Header() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const { data: session, status } = useSession();
+  
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -19,8 +20,6 @@ export default function Header() {
   useEffect(() => {
     if (status === "authenticated" && session?.user?.accessToken) {
       dispatch(fetchCurrentUser());
-    } else {
-      signOut({ callbackUrl: "/login" });
     }
   }, [status, session, dispatch]);
 
