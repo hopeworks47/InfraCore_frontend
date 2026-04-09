@@ -43,7 +43,42 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.accessToken = user.accessToken;
+                token.accessTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour expiry
             }
+            
+            // If token hasn't expired, return it
+            if (token.accessTokenExpires && Date.now() < (token.accessTokenExpires as number)) {
+                return token;
+            }
+            
+            // Token expired, try to refresh it
+            try {
+                const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+                if (!apiBaseUrl) {
+                    throw new Error("API base URL not configured");
+                }
+                
+                const res = await fetch(`${apiBaseUrl}/api/v1/auth/refresh`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refreshToken: token.refreshToken }),
+                });
+                
+                const data = await res.json();
+                if (res.ok && data.access_token) {
+                    return {
+                        ...token,
+                        accessToken: data.access_token,
+                        accessTokenExpires: Date.now() + 60 * 60 * 1000,
+                        refreshToken: data.refresh_token || token.refreshToken,
+                    };
+                }
+            } catch (error) {
+                console.error("Token refresh failed:", error);
+            }
+            
+            // Refresh failed, invalidate token
+            token.accessToken = undefined;
             return token;
         },
         async session({ session, token }) {
