@@ -1,17 +1,6 @@
 "use client";
 
-type ProjectModalProps = {
-    isOpen: boolean;
-    project: {
-        title: string;
-        type: string;
-        assignee: string;
-        due: string;
-        status: string;
-        description?: string;
-    } | null;
-    onClose: () => void;
-};
+import type { ProjectModalProps } from "@/types/components.types";
 
 export default function ProjectModal({ isOpen, project, onClose }: ProjectModalProps) {
     if (!isOpen || !project) {

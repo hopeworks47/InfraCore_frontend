@@ -1,22 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { signIn, signOut } from "next-auth/react";
 import { getSession } from "next-auth/react";
+import type { AuthState, AuthUser } from "../../types/auth.types";
 
-interface User {
-  _id: string;
-  email: string;
-  name?: string;
-  role: string;
-  profileImage: File | null;
-  birthDate?: string;
-  accessToken?: string; // Optional, depending on how you manage tokens
-}
-
-interface AuthState {
-  user: User | null;
-  isLoading: boolean;
-  error: string | null;
-}
+// Type alias for backward compatibility
+type User = AuthUser;
 
 const initialState: AuthState = {
   user: null,
@@ -43,8 +31,8 @@ export const loginUser = createAsyncThunk(
       const sessionResponse = await fetch("/api/auth/session");
       const session = await sessionResponse.json();
       return session.user;
-    } catch (error) {
-      return rejectWithValue("Login failed: " + error);
+    } catch {
+      return rejectWithValue("Login failed");
     }
   },
 );
@@ -67,7 +55,7 @@ export const registerUser = createAsyncThunk(
       const password = formData.get("password") as string;
       await signIn("credentials", { email, password, redirect: false });
       return data;
-    } catch (error) {
+    } catch {
       return rejectWithValue("Network Error");
     }
   },
@@ -94,7 +82,7 @@ export const fetchCurrentUser = createAsyncThunk(
       const data = await res.json();
       if (!res.ok) return rejectWithValue(data.detail);
       return data;
-    } catch (error) {
+    } catch {
       return rejectWithValue("Failed to fetch user");
     }
   },

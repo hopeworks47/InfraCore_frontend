@@ -1,16 +1,6 @@
 "use client";
 
-import type { DragEvent } from "react";
-
-type ProjectCardProps = {
-    title: string;
-    type: string;
-    assignee: string;
-    due: string;
-    onClick?: () => void;
-    onDragStart?: (event: DragEvent<HTMLDivElement>) => void;
-    onDragEnd?: () => void;
-};
+import type { ProjectCardProps } from "@/types/components.types";
 
 export default function ProjectCard({ title, type, assignee, due, onClick, onDragStart, onDragEnd }: ProjectCardProps) {
     return (

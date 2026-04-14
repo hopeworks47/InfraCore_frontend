@@ -1,19 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-
-type NewProjectModalProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    onSubmit: (project: {
-        title: string;
-        type: string;
-        assignee: string;
-        due: string;
-        status: string;
-        description: string;
-    }) => void;
-};
+import type { NewProjectModalProps } from "@/types/components.types";
 
 export default function NewProjectModal({ isOpen, onClose, onSubmit }: NewProjectModalProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);

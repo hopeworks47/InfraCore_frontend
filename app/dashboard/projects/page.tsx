@@ -2,24 +2,11 @@
 
 import { useState } from "react";
 import type { DragEvent } from "react";
+import type { ProjectItem, BoardColumn } from "@/types/project.types";
 import NewProjectButton from "./new-project-button";
 import ProjectCard from "./project-card";
 import ProjectModal from "./project-modal";
 import NewProjectModal from "./new-project-modal";
-
-type ProjectItem = {
-    title: string;
-    type: string;
-    assignee: string;
-    due: string;
-    status: string;
-    description?: string;
-};
-
-type BoardColumn = {
-    title: string;
-    cards: ProjectItem[];
-};
 
 const initialColumns: BoardColumn[] = [
     {

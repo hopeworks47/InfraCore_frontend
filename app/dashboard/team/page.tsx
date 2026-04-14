@@ -1,12 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import TeamMembersTable from "./team-members-table";
-
-type TeamMember = {
-  _id: string;
-  name: string;
-  email: string;
-};
+import type { TeamMember } from "@/types/user.types";
 
 async function getTeamMembers(accessToken: string) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;

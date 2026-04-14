@@ -1,31 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getSession } from "next-auth/react";
-
-export interface Comment {
-  text: string;
-  created_by: string;
-  created_at: string;
-}
-
-export interface Project {
-  _id: string;
-  name: string;
-  description?: string;
-  status: "todo" | "inprogress" | "qa" | "complete";
-  priority: "low" | "medium" | "high";
-  assignee_id?: string;
-  assignee_name?: string;
-  due_date?: string;
-  comments?: Comment[];
-  created_at: string;
-  updated_at?: string;
-}
-
-interface ProjectState {
-  projects: Project[];
-  isLoading: boolean;
-  error: string | null;
-}
+import type { Project, ProjectState } from "../../types/project.types";
 
 const initialState: ProjectState = {
   projects: [],

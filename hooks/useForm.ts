@@ -1,14 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
-
-interface FormFields {
-  [key: string]: any;
-}
-
-interface UseFormOptions<T> {
-  initialValues: T;
-  validate?: (values: T) => Partial<Record<keyof T, string>>;
-  onSubmit: (values: T) => void | Promise<void>;
-}
+import type { FormFields, UseFormOptions, UseFormReturn } from '../types/forms.types';
 
 export function useForm<T extends FormFields>({
   initialValues,

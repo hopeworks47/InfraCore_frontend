@@ -1,10 +1,6 @@
 "use client";
 
-type NewProjectButtonProps = {
-    label?: string;
-    onClick?: () => void;
-    onOpen?: () => void;
-};
+import type { NewProjectButtonProps } from "@/types/components.types";
 
 export default function NewProjectButton({ label = "New project", onClick, onOpen }: NewProjectButtonProps) {
     const handleClick = () => {
