@@ -1,21 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import EditMemberModal from "./edit-member-modal";
-
-type TeamMember = {
-  _id: string;
-  name?: string;
-  email?: string;
-  role?: "admin" | "leader" | "member";
-  created_at?: string;
-};
+import type { TeamMember } from "@/types/user.types";
 
 type TeamMembersTableProps = {
   members: TeamMember[];
 };
 
 const PAGE_SIZE = 5;
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function formatJoinedDate(member: TeamMember) {
   const value = member.created_at;
@@ -30,13 +25,6 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [draftName, setDraftName] = useState("");
-  const [draftEmail, setDraftEmail] = useState("");
-  const [draftRole, setDraftRole] = useState<"admin" | "leader" | "member">(
-    "member"
-  );
-  const trimmedDraftName = (draftName ?? "").trim();
-  const trimmedDraftEmail = (draftEmail ?? "").trim();
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
@@ -48,35 +36,12 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
 
   const handleStartEdit = (member: TeamMember) => {
     setEditingMemberId(member._id);
-    setDraftName(member.name ?? "");
-    setDraftEmail(member.email ?? "");
-    setDraftRole(member.role ?? "member");
     setIsEditModalOpen(true);
   };
 
   const handleCancelEdit = () => {
     setIsEditModalOpen(false);
     setEditingMemberId(null);
-    setDraftName("");
-    setDraftEmail("");
-    setDraftRole("member");
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingMemberId) return;
-    setRows((prev) =>
-      prev.map((member) =>
-        member._id === editingMemberId
-          ? {
-              ...member,
-              name: trimmedDraftName,
-              email: trimmedDraftEmail,
-              role: draftRole,
-            }
-          : member
-      )
-    );
-    handleCancelEdit();
   };
 
   const handleDelete = (memberId: string) => {
@@ -109,6 +74,9 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
                 No.
               </th>
               <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Profile Image
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Name
               </th>
               <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -127,11 +95,30 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
             {pagedRows.map((member, index) => {
+              console.log("Rendering member:", `${apiBaseUrl}${member.profile_image}`);
               const serialNumber = (safePage - 1) * PAGE_SIZE + index + 1;
               return (
                 <tr key={member._id}>
                   <td className="px-4 py-3 text-center text-sm text-gray-700">
                     {serialNumber}
+                  </td>
+                  <td className="px-4 py-3 text-center text-sm text-gray-700">
+                    {member.profile_image ? (
+                      <Image
+                        src={`${apiBaseUrl}${member.profile_image}`}
+                        alt={`${member.name || "Member"}'s profile`}
+                        width={32}
+                        height={32}
+                        unoptimized
+                        className="mx-auto h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="mx-auto h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                        <span className="text-xs text-gray-600">
+                          {member.name ? member.name.charAt(0).toUpperCase() : "?"}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center text-sm text-gray-700">
                     {member.name ?? "-"}
@@ -199,16 +186,21 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
       </div>
 
       <EditMemberModal
+        key={`${editingMemberId || "new"}-${isEditModalOpen}`}
         isOpen={isEditModalOpen}
-        draftName={draftName}
-        draftEmail={draftEmail}
-        draftRole={draftRole}
-        onNameChange={setDraftName}
-        onEmailChange={setDraftEmail}
-        onRoleChange={setDraftRole}
+        member={rows.find((m) => m._id === editingMemberId) || null}
         onCancel={handleCancelEdit}
-        onUpdate={handleSaveEdit}
-        isUpdateDisabled={!trimmedDraftName || !trimmedDraftEmail}
+        onUpdateSuccess={(updatedMember) => {
+          console.log("handleUpdateMemberSuccess called with:", updatedMember);
+          setRows((prev) => {
+            const updated = prev.map((member) =>
+              member._id === updatedMember._id ? updatedMember : member
+            );
+            console.log("Updated rows:", updated);
+            return updated;
+          });
+          handleCancelEdit();
+        }}
       />
 
       <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">

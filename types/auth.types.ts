@@ -30,7 +30,7 @@ export interface AuthUser {
     email: string;
     name?: string;
     role: string;
-    profileImage: File | null;
+    profile_image: File | null;
     birthDate?: string;
     accessToken?: string;
 }

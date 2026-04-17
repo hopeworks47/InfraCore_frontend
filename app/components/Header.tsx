@@ -84,9 +84,9 @@ export default function Header() {
               {user && user.email ? user.email : "No Email"}
             </span>
           </span>
-          {user && user.profileImage ? (
+          {user && user.profile_image ? (
             <Image
-              src={`${apiBaseUrl}${user.profileImage}`}
+              src={`${apiBaseUrl}${user.profile_image}`}
               alt={user && user.name ? user.name : "User Avatar"}
               width={36}
               height={36}

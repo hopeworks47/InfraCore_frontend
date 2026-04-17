@@ -25,7 +25,7 @@ export default function RegisterPage() {
       confirmPassword: '',
       name: '',
       role: 'member', // default
-      profileImage: null as File | null,
+      profile_image: null as File | null,
       birthDate: '',
     },
     validate: (values) => {
@@ -47,8 +47,8 @@ export default function RegisterPage() {
         formData.append('name', formValues.name);
         formData.append('role', formValues.role);
         if (formValues.birthDate) formData.append('birthDate', formValues.birthDate);
-        if (formValues.profileImage instanceof File) {
-            formData.append('profile_image', formValues.profileImage);
+        if (formValues.profile_image instanceof File) {
+            formData.append('profile_image', formValues.profile_image);
         }
         await dispatch(registerUser(formData));
       // On success, Redux state will have user and redirect via useEffect
