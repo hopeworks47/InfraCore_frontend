@@ -26,9 +26,18 @@ export default function TeamPage() {
   const { data: session } = useSession();
   const dispatch = useAppDispatch();
   const team = useAppSelector((state) => state.user.users || []);
+  const currentUser = useAppSelector((state) => state.auth.user);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check if current user is admin
+  const isAdmin = currentUser?.role === 'admin';
+
+  // Filter out the current user from the team list (users shouldn't see themselves in the team list)
+  const filteredTeam = team.filter(member =>
+    member._id !== currentUser?._id && member.email !== currentUser?.email
+  );
 
   useEffect(() => {
     const loadTeamMembers = async () => {
@@ -60,21 +69,25 @@ export default function TeamPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Team Members</h1>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-        >
-          Add User
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+          >
+            Add User
+          </button>
+        )}
       </div>
       {error && <p className="text-red-500">{error}</p>}
-      {!error && !isLoading && <TeamMembersTable members={team} />}
+      {!error && !isLoading && <TeamMembersTable members={filteredTeam} isAdmin={isAdmin} />}
       {isLoading && <p className="text-gray-500">Loading team members...</p>}
-      <AddMemberModal
-        isOpen={isAddModalOpen}
-        onCancel={() => setIsAddModalOpen(false)}
-        onAddSuccess={handleAddMemberSuccess}
-      />
+      {isAdmin && (
+        <AddMemberModal
+          isOpen={isAddModalOpen}
+          onCancel={() => setIsAddModalOpen(false)}
+          onAddSuccess={handleAddMemberSuccess}
+        />
+      )}
     </div>
   );
 }

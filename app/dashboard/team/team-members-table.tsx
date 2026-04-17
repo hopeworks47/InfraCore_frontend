@@ -10,6 +10,7 @@ import type { AppDispatch } from "@/types/redux.types";
 
 type TeamMembersTableProps = {
   members: TeamMember[];
+  isAdmin?: boolean;
 };
 
 const PAGE_SIZE = 5;
@@ -23,7 +24,7 @@ function formatJoinedDate(member: TeamMember) {
   return date.toLocaleDateString();
 }
 
-export default function TeamMembersTable({ members }: TeamMembersTableProps) {
+export default function TeamMembersTable({ members, isAdmin = false }: TeamMembersTableProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [rows, setRows] = useState<TeamMember[]>(members);
   const [currentPage, setCurrentPage] = useState(1);
@@ -166,51 +167,55 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
                     {formatJoinedDate(member)}
                   </td>
                   <td className="px-4 py-3 text-center text-sm">
-                    <div className="inline-flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(member)}
-                        aria-label="Update member"
-                        className="rounded border border-blue-200 p-2 text-blue-700 hover:bg-blue-50"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
+                    {isAdmin ? (
+                      <div className="inline-flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(member)}
+                          aria-label="Update member"
+                          className="rounded border border-blue-200 p-2 text-blue-700 hover:bg-blue-50"
                         >
-                          <path
-                            d="M4 20h4l10-10-4-4L4 16v4z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(member._id)}
-                        disabled={deletingId === member._id}
-                        aria-label="Delete member"
-                        className="rounded border border-red-200 p-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M4 20h4l10-10-4-4L4 16v4z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(member._id)}
+                          disabled={deletingId === member._id}
+                          aria-label="Delete member"
+                          className="rounded border border-red-200 p-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <path
-                            d="M6 7h12M9 7V5h6v2m-7 3v7m4-7v7m4-10-1 12H9L8 7"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M6 7h12M9 7V5h6v2m-7 3v7m4-7v7m4-10-1 12H9L8 7"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">No actions available</span>
+                    )}
                   </td>
                 </tr>
               );
