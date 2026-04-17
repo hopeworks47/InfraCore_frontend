@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+// import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loginUser, clearError } from "@/store/slices/authSlice";
 import { useForm } from "@/hooks/useForm";
@@ -77,12 +77,12 @@ export default function LoginPage() {
           {isSubmitting || isLoading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-gray-500">
+      {/* <p className="mt-4 text-center text-sm text-gray-500">
         Don't have an account?{" "}
         <Link href="/register" className="text-blue-600 hover:underline">
           Register
         </Link>
-      </p>
+      </p> */}
     </>
   );
 }

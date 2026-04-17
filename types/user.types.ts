@@ -18,4 +18,6 @@ export interface UserState {
     name: string | null;
     email: string | null;
     profile_image: string | null;
+    users?: TeamMember[]; // For team management
+    lastDeleteMessage?: string; // For delete operation feedback
 }

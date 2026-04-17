@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
+import { useDispatch } from "react-redux";
 import EditMemberModal from "./edit-member-modal";
+import { deleteUser } from "@/store/slices/userSlice";
 import type { TeamMember } from "@/types/user.types";
+import type { AppDispatch } from "@/types/redux.types";
 
 type TeamMembersTableProps = {
   members: TeamMember[];
@@ -21,10 +24,18 @@ function formatJoinedDate(member: TeamMember) {
 }
 
 export default function TeamMembersTable({ members }: TeamMembersTableProps) {
+  const dispatch = useDispatch<AppDispatch>();
   const [rows, setRows] = useState<TeamMember[]>(members);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Update rows when members prop changes
+  useEffect(() => {
+    setRows(members);
+  }, [members]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
@@ -44,15 +55,32 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
     setEditingMemberId(null);
   };
 
-  const handleDelete = (memberId: string) => {
-    setRows((prev) => {
-      const updated = prev.filter((member) => member._id !== memberId);
-      const updatedTotalPages = Math.max(1, Math.ceil(updated.length / PAGE_SIZE));
-      setCurrentPage((page) => Math.min(page, updatedTotalPages));
-      return updated;
-    });
-    if (editingMemberId === memberId && isEditModalOpen) {
-      handleCancelEdit();
+  const handleDelete = async (memberId: string) => {
+    setDeletingId(memberId);
+    setDeleteError(null);
+    
+    try {
+      const result = await dispatch(deleteUser(memberId));
+      
+      if (result.type === deleteUser.fulfilled.type) {
+        // API call succeeded, update local state
+        setRows((prev) => {
+          const updated = prev.filter((member) => member._id !== memberId);
+          const updatedTotalPages = Math.max(1, Math.ceil(updated.length / PAGE_SIZE));
+          setCurrentPage((page) => Math.min(page, updatedTotalPages));
+          return updated;
+        });
+        
+        if (editingMemberId === memberId && isEditModalOpen) {
+          handleCancelEdit();
+        }
+      } else if (result.type === deleteUser.rejected.type) {
+        setDeleteError(result.payload as string || "Failed to delete member");
+      }
+    } catch {
+      setDeleteError("An error occurred while deleting the member");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -65,7 +93,13 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div>
+      {deleteError && (
+        <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {deleteError}
+        </div>
+      )}
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -94,8 +128,7 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {pagedRows.map((member, index) => {
-              console.log("Rendering member:", `${apiBaseUrl}${member.profile_image}`);
+            {pagedRows.map((member, index) => {              
               const serialNumber = (safePage - 1) * PAGE_SIZE + index + 1;
               return (
                 <tr key={member._id}>
@@ -158,8 +191,9 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
                       <button
                         type="button"
                         onClick={() => handleDelete(member._id)}
+                        disabled={deletingId === member._id}
                         aria-label="Delete member"
-                        className="rounded border border-red-200 p-2 text-red-600 hover:bg-red-50"
+                        className="rounded border border-red-200 p-2 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <svg
                           className="h-4 w-4"
@@ -229,6 +263,7 @@ export default function TeamMembersTable({ members }: TeamMembersTableProps) {
             Next
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
