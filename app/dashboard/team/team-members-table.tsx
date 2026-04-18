@@ -230,12 +230,10 @@ export default function TeamMembersTable({ members, isAdmin = false }: TeamMembe
         member={rows.find((m) => m._id === editingMemberId) || null}
         onCancel={handleCancelEdit}
         onUpdateSuccess={(updatedMember) => {
-          console.log("handleUpdateMemberSuccess called with:", updatedMember);
           setRows((prev) => {
             const updated = prev.map((member) =>
               member._id === updatedMember._id ? updatedMember : member
             );
-            console.log("Updated rows:", updated);
             return updated;
           });
           handleCancelEdit();

@@ -41,9 +41,7 @@ export default function EditMemberModal({
       return validationErrors;
     },
     onSubmit: async (formValues: MemberFormValues) => {
-      console.log("onSubmit called with:", formValues);
       if (!member) {
-        console.log("No member provided");
         return;
       }
       const formData = new FormData();
@@ -53,12 +51,9 @@ export default function EditMemberModal({
       if (formValues.profile_image instanceof File) {
         formData.append('profile_image', formValues.profile_image);
       }
-      console.log("Dispatching updateUser with userId:", member._id);
       try {
         const result = await dispatch(updateUser({ userId: member._id, updateData: formData }));
-        console.log("updateUser result:", result);
         if (updateUser.fulfilled.match(result)) {
-          console.log("Update successful, calling onUpdateSuccess");
           // Merge API response with existing member data to ensure all TeamMember fields are present
           const updatedMember: TeamMember = {
             ...member,
@@ -96,7 +91,7 @@ export default function EditMemberModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
         <h2 className="mb-4 text-lg font-semibold text-gray-800">Update Member</h2>
-        <form onSubmit={(e) => { console.log("Form onSubmit called"); handleSubmit(e); }} className="space-y-3">
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-3">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
             <input
