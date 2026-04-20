@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 // import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -10,14 +9,8 @@ import { useForm } from "@/hooks/useForm";
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isLoading, error, user } = useAppSelector((state) => state.auth)
-
-  useEffect(() => {
-    if(user) {
-        router.push('/dashboard');
-    }
-  }, [user, router])
-
+  const { isLoading, error } = useAppSelector((state) => state.auth);
+  
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useForm({
     initialValues: {email: '', password: ''},
     validate: (values) => {
