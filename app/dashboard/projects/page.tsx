@@ -185,7 +185,7 @@ export default function ProjectsPage() {
                 </div>                
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-5">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Job Board</p>
@@ -200,7 +200,7 @@ export default function ProjectsPage() {
                             key={column.title}
                             onDragOver={handleDragOver}
                             onDrop={() => handleDrop(column.title)}
-                            className="min-w-[280px] rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm"
+                            className="min-w-[280px] border border-slate-200 bg-slate-50 p-4 shadow-sm"
                         >
                             <div className="mb-4 flex items-center justify-between">
                                 <div>

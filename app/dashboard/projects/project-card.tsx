@@ -9,7 +9,7 @@ export default function ProjectCard({ title, type, assignee, due, onClick, onDra
             onClick={onClick}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+            className="border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
         >
             <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold uppercase text-blue-700">
