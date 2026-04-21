@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getSession } from "next-auth/react";
 import Image from "next/image";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { fetchCurrentUser } from "@/store/slices/authSlice";
+import { useForm } from "@/hooks/useForm";
 
 /**
  * Profile Page Component
@@ -15,8 +17,72 @@ export default function ProfilePage() {
   const dispatch = useAppDispatch();
   const { user, isLoading } = useAppSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const { values, errors, isSubmitting, handleChange, handleSubmit, setValues } = useForm({
+    initialValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+    validate: (values) => {
+      const validationErrors: Partial<Record<keyof typeof values, string>> = {};
+      if (!values.currentPassword) validationErrors.currentPassword = "Current password is required.";
+      if (!values.newPassword) validationErrors.newPassword = "New password is required.";
+      else if (values.newPassword.length < 6) validationErrors.newPassword = "New password must be at least 6 characters.";
+      if (!values.confirmPassword) validationErrors.confirmPassword = "Confirm password is required.";
+      if (values.newPassword && values.confirmPassword && values.newPassword !== values.confirmPassword) {
+        validationErrors.confirmPassword = "Passwords do not match.";
+      }
+      return validationErrors;
+    },
+    onSubmit: async (formValues) => {
+      setPasswordError("");
+      setPasswordSuccess("");
+
+      if (!apiBaseUrl) {
+        setPasswordError("API base URL is not configured.");
+        return;
+      }
+
+      try {
+        const session = await getSession();
+        const token = session?.user?.accessToken;
+        if (!token) {
+          setPasswordError("Unable to authenticate request.");
+          return;
+        }
+
+        const response = await fetch(`${apiBaseUrl}/api/v1/users/change-password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            current_password: formValues.currentPassword,
+            new_password: formValues.newPassword,
+            confirm_password: formValues.confirmPassword,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          setPasswordError(data.detail || data.message || "Password change failed.");
+          return;
+        }
+
+        setPasswordSuccess(data.message || "Password updated successfully.");
+        setValues({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } catch (error) {
+        setPasswordError(error instanceof Error ? error.message : "Password change failed.");
+      }
+    },
+  });
 
   useEffect(() => {
     // Fetch current user data when component mounts
@@ -192,13 +258,93 @@ export default function ProfilePage() {
         <div className="bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
           <div className="space-y-3">
-            <button className="w-full text-left px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-              Change Password
+            <button
+              type="button"
+              onClick={() => {
+                setShowPasswordForm((prev) => {
+                  if (prev) {
+                    setValues({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                  }
+                  return !prev;
+                });
+                setPasswordError("");
+                setPasswordSuccess("");
+              }}
+              className="w-full text-left px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              {showPasswordForm ? "Hide Password Form" : "Change Password"}
             </button>
             <button className="w-full text-left px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
               Two-Factor Authentication
             </button>
           </div>
+          {showPasswordForm && (
+            <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-6">
+              <h4 className="text-base font-semibold text-slate-900 mb-4">Update your password</h4>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Current Password</label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={values.currentPassword}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.currentPassword && <p className="text-sm text-red-600">{errors.currentPassword}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">New Password</label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={values.newPassword}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.newPassword && <p className="text-sm text-red-600">{errors.newPassword}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Confirm New Password</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={values.confirmPassword}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.confirmPassword && <p className="text-sm text-red-600">{errors.confirmPassword}</p>}
+                </div>
+
+                {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
+                {passwordSuccess && <p className="text-sm text-green-600">{passwordSuccess}</p>}
+
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      setValues({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                      setPasswordError("");
+                      setPasswordSuccess("");
+                    }}
+                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  >
+                    {isSubmitting ? "Saving..." : "Save New Password"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
 
         {/* Preferences */}
