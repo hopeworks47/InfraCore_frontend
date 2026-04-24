@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['198.18.0.73'],  
+  allowedDevOrigins: ['198.18.1.110'],  
   images: {
     remotePatterns: [
       {
@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "127.0.0.1",
+        hostname: "198.18.1.110",
         port: "",
         pathname: "/**",
       },

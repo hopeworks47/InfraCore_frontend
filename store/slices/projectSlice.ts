@@ -30,19 +30,18 @@ export const fetchProjects = createAsyncThunk(
 export const createProject = createAsyncThunk(
   "projects/create",
   async (
-    projectData: { name: string; description?: string; priority?: string },
+    formData: FormData,
     { rejectWithValue },
   ) => {
     const session = await getSession();
     const token = session?.user?.accessToken;
-    if (!token) return rejectWithValue("No access token");
-    const res = await fetch(`${API_BASE}/api/v1/projects`, {
+    if (!token) return rejectWithValue("No access token");    
+    const res = await fetch(`${API_BASE}/api/v1/projects/new-project`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ ...projectData, status: "todo" }),
+      body: formData,
     });
     const data = await res.json();
     if (!res.ok) return rejectWithValue(data.detail || "Creation failed");

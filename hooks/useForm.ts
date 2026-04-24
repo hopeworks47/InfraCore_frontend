@@ -10,7 +10,7 @@ export function useForm<T extends FormFields>({
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     // Clear error for this field when user types
@@ -33,13 +33,17 @@ export function useForm<T extends FormFields>({
     setIsSubmitting(false);
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files.length > 0) {
-      setValues((prev) => ({ ...prev, [name]: files?.[0] || null }));
-      if (errors[name as keyof T]) {
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
+      // Support multiple files: store array
+      if (e.target.multiple) {
+        setValues(prev => ({ ...prev, [name]: Array.from(files) }));
+      } else {
+        setValues(prev => ({ ...prev, [name]: files[0] }));
       }
+    } else {
+      setValues(prev => ({ ...prev, [name]: [] })); // or null for single
     }
   };
 
