@@ -1,99 +1,61 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
-import type { ProjectItem, BoardColumn } from "@/types/project.types";
+import type { Project, ProjectItem, BoardColumn } from "@/types/project.types";
 import NewProjectButton from "./new-project-button";
 import ProjectCard from "./project-card";
 import ProjectModal from "./project-modal";
 import NewProjectModal from "./new-project-modal";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchProjects, fetchProject, updateProject, createProject } from "@/store/slices/projectSlice";
 
-const initialColumns: BoardColumn[] = [
-    {
-        title: "Todo",
-        cards: [
-            {
-                title: "Set up project schema",
-                type: "Task",
-                assignee: "Ava",
-                due: "Apr 15",
-                status: "Todo",
-                description: "Create the base project schema and wire up the initial data model."
-            },
-            {
-                title: "Review onboarding flow",
-                type: "Story",
-                assignee: "Noah",
-                due: "Apr 17",
-                status: "Todo",
-                description: "Review the new user onboarding steps and ensure flows are intuitive."
-            }
-        ]
-    },
-    {
-        title: "In Progress",
-        cards: [
-            {
-                title: "Job board UI design",
-                type: "Epic",
-                assignee: "Mia",
-                due: "Apr 12",
-                status: "In Progress",
-                description: "Design the Jira-style job board layout with draggable cards and clear statuses."
-            }
-        ]
-    },
-    {
-        title: "QA",
-        cards: [
-            {
-                title: "Validate test coverage",
-                type: "Task",
-                assignee: "Ethan",
-                due: "Apr 14",
-                status: "QA",
-                description: "Complete QA checks and verify the board behavior matches acceptance criteria."
-            }
-        ]
-    },
-    {
-        title: "Complete",
-        cards: [
-            {
-                title: "Finalize release notes",
-                type: "Story",
-                assignee: "Liam",
-                due: "Apr 10",
-                status: "Complete",
-                description: "Prepare release notes and ensure all completed items are documented."
-            }
-        ]
-    },
-    {
-        title: "Done",
-        cards: [
-            {
-                title: "Add user auth flow",
-                type: "Task",
-                assignee: "Olivia",
-                due: "Apr 9",
-                status: "Done",
-                description: "User authentication flow is complete and ready for final verification."
-            }
-        ]
-    }
-];
+const initialColumns: BoardColumn[] = [];
 
 export default function ProjectsPage() {
-    const [columns, setColumns] = useState<BoardColumn[]>(initialColumns);
-    const [draggedCard, setDraggedCard] = useState<{ fromColumn: string; card: ProjectItem } | null>(null);
+    const [localColumns, setLocalColumns] = useState<BoardColumn[]>((initialColumns as BoardColumn[]));
+    const [draggedCard, setDraggedCard] = useState<{ fromColumn: string; card: ProjectItem & { id?: string } } | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
     const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const projects = useAppSelector((state) => state.projects.projects);
+
+    useEffect(() => {
+        dispatch(fetchProjects());
+    }, [dispatch]);
+
+    const convertProjectToCard = (project: Project): ProjectItem & { id: string } => ({
+        id: project._id ?? project.id ?? project.title,
+        title: project.title,
+        type: project.task_type || project.priority || "Task",
+        assignee: project.assignee_id || "Unassigned",
+        due: project.due_date || "No due date",
+        status: project.status || "Todo",
+        description: project.description,
+    });
+
+    const columnsFromProjects = useMemo(() => {
+        const cards = projects.map(convertProjectToCard);
+        const groups = [
+            { title: "Todo", predicate: (status: string) => status.includes("todo") },
+            { title: "In Progress", predicate: (status: string) => status.includes("progress") },
+            { title: "QA", predicate: (status: string) => status.includes("qa") },
+            { title: "Complete", predicate: (status: string) => status.includes("complete") },
+            { title: "Done", predicate: (status: string) => status.includes("done") },
+        ];
+
+        return groups.map(({ title, predicate }) => ({
+            title,
+            cards: cards.filter((card) => predicate(card.status.toLowerCase())),
+        }));
+    }, [projects]);
+
+    const columns = projects.length ? columnsFromProjects : localColumns;
 
     const handleDragStart = (columnTitle: string, card: ProjectItem) => (event: DragEvent<HTMLDivElement>) => {
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", JSON.stringify({ fromColumn: columnTitle, title: card.title }));
-        setDraggedCard({ fromColumn: columnTitle, card });
+        setDraggedCard({ fromColumn: columnTitle, card: card as ProjectItem & { id?: string } });
     };
 
     const handleDragEnd = () => {
@@ -114,44 +76,66 @@ export default function ProjectsPage() {
             return;
         }
 
-        setColumns((currentColumns) => {
-            const sourceColumn = currentColumns.find((column) => column.title === draggedCard.fromColumn);
-            const destinationColumn = currentColumns.find((column) => column.title === targetColumn);
-            if (!sourceColumn || !destinationColumn) {
-                return currentColumns;
+        if (draggedCard.card.id) {
+            // Find the current project and create full updated project
+            const currentProject = projects.find(p => (p._id ?? p.id) === draggedCard.card.id);
+            if (currentProject) {
+                const updatedProject = { ...currentProject, status: targetColumn };
+                dispatch(updateProject({ projectId: draggedCard.card.id, updates: updatedProject }));
             }
-
-            const cardToMove = sourceColumn.cards.find((item) => item.title === draggedCard.card.title);
-            if (!cardToMove) {
-                return currentColumns;
-            }
-
-            const movedCard = { ...cardToMove, status: targetColumn };
-
-            return currentColumns.map((column) => {
-                if (column.title === draggedCard.fromColumn) {
-                    return {
-                        ...column,
-                        cards: column.cards.filter((item) => item.title !== draggedCard.card.title)
-                    };
+        } else {
+            // Update local columns
+            setLocalColumns((currentColumns) => {
+                const sourceColumn = currentColumns.find((column) => column.title === draggedCard.fromColumn);
+                const destinationColumn = currentColumns.find((column) => column.title === targetColumn);
+                if (!sourceColumn || !destinationColumn) {
+                    return currentColumns;
                 }
 
-                if (column.title === targetColumn) {
-                    return {
-                        ...column,
-                        cards: [...column.cards, movedCard]
-                    };
+                const cardToMove = sourceColumn.cards.find((item) => item.title === draggedCard.card.title);
+                if (!cardToMove) {
+                    return currentColumns;
                 }
 
-                return column;
+                const movedCard = { ...cardToMove, status: targetColumn };
+
+                return currentColumns.map((column) => {
+                    if (column.title === draggedCard.fromColumn) {
+                        return {
+                            ...column,
+                            cards: column.cards.filter((item) => item.title !== draggedCard.card.title)
+                        };
+                    }
+
+                    if (column.title === targetColumn) {
+                        return {
+                            ...column,
+                            cards: [...column.cards, movedCard]
+                        };
+                    }
+
+                    return column;
+                });
             });
-        });
+        }
 
         setDraggedCard(null);
     };
 
-    const handleCardClick = (card: ProjectItem) => {
-        setSelectedProject(card);
+    const handleCardClick = (card: ProjectItem & { id?: string }) => {
+        if (!card.id) {
+            setSelectedProject(card);
+            return;
+        }
+
+        dispatch(fetchProject(card.id))
+            .unwrap()
+            .then((project: Project) => {
+                setSelectedProject(convertProjectToCard(project));
+            })
+            .catch(() => {
+                setSelectedProject(card);
+            });
     };
 
     const closeModal = () => {
@@ -167,10 +151,24 @@ export default function ProjectsPage() {
     };
 
     const handleNewProjectSubmit = (project: Omit<ProjectItem, "id">) => {
-        const todoColumn = columns.find((col) => col.title === "Todo");
-        if (todoColumn) {
-            todoColumn.cards.push(project);
-            setColumns([...columns]);
+        if (projects.length > 0) {
+            // Dispatch createProject to store
+            const formData = new FormData();
+            formData.append('title', project.title);
+            formData.append('description', project.description || '');
+            formData.append('task_type', project.type);
+            formData.append('priority', 'Medium'); // default
+            formData.append('status', 'Todo');
+            formData.append('due_date', project.due);
+            // assignee_id if needed
+            dispatch(createProject(formData));
+        } else {
+            // Add to local columns
+            const todoColumn = localColumns.find((col) => col.title === "Todo");
+            if (todoColumn) {
+                todoColumn.cards.push(project);
+                setLocalColumns([...localColumns]);
+            }
         }
         handleNewProjectClose();
     };

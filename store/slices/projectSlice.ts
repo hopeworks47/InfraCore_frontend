@@ -27,6 +27,21 @@ export const fetchProjects = createAsyncThunk(
   },
 );
 
+export const fetchProject = createAsyncThunk(
+  "projects/fetchOne",
+  async (projectId: string, { rejectWithValue }) => {
+    const session = await getSession();
+    const token = session?.user?.accessToken;
+    if (!token) return rejectWithValue("No access token");
+    const res = await fetch(`${API_BASE}/api/v1/projects/${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) return rejectWithValue(data.detail || "Failed to fetch project");
+    return data as Project;
+  },
+);
+
 export const createProject = createAsyncThunk(
   "projects/create",
   async (
@@ -142,6 +157,21 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchProject.fulfilled, (state, action) => {
+        const payloadProject = action.payload as Project;
+        const projectId = payloadProject._id ?? payloadProject.id;
+        const index = state.projects.findIndex(
+          (p) => (p._id ?? p.id) === projectId,
+        );
+        if (index !== -1) {
+          state.projects[index] = action.payload;
+        } else {
+          state.projects.push(action.payload);
+        }
+      })
+      .addCase(fetchProject.rejected, (state, action) => {
         state.error = action.payload as string;
       })
       // create

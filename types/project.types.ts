@@ -6,7 +6,8 @@ export interface Comment {
 }
 
 export interface Project {
-  id: string;
+  _id?: string;
+  id?: string;
   title: string;
   description?: string;
   priority: string;
@@ -16,6 +17,7 @@ export interface Project {
   status: string;
   attachment?: string;
   created_at: string;
+  comments?: Comment[];
 }
 
 export interface ProjectItem {

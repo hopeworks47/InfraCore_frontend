@@ -38,9 +38,6 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                             <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50 transition">
                                 🔗 Link issue
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50 transition">
-                                ⋯ More
-                            </button>
                         </div>
 
                         <div className="mb-8">
