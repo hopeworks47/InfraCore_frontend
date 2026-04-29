@@ -148,8 +148,7 @@ export default function EditMemberModal({
             <button
               type="submit"
               disabled={isUpdateDisabled}
-              className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={() => console.log("Button clicked, disabled:", isUpdateDisabled, "values:", values)}
+              className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"              
             >
               Update
             </button>
