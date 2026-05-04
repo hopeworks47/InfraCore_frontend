@@ -65,11 +65,11 @@ export default function ProjectsPage() {
             return;
         }
 
-        const draggedId = draggedCard.card._id ?? draggedCard.card.id;
+        const draggedId = draggedCard.card._id;
 
         if (draggedId) {
             // Find the current project and create full updated project
-            const currentProject = projects.find((p) => (p._id ?? p.id) === draggedId);
+            const currentProject = projects.find((p) => p._id === draggedId);
             if (currentProject) {
                 const updatedProject = { ...currentProject, status: targetColumn };
                 dispatch(updateProject({ projectId: draggedId, updates: updatedProject }));
@@ -114,7 +114,7 @@ export default function ProjectsPage() {
     };
 
     const handleCardClick = (card: Project) => {
-        const projectId = card._id ?? card.id;
+        const projectId = card._id;
         if (!projectId) {
             setSelectedProject(card);
             return;
@@ -204,7 +204,7 @@ export default function ProjectsPage() {
                             <div className="space-y-4">
                                 {column.cards.map((card) => (
                                     <ProjectCard
-                                        key={`${column.title}-${card._id ?? card.id ?? card.title}`}
+                                        key={`${column.title}-${card._id ?? card.title}`}
                                         title={card.title}
                                         type={card.task_type}
                                         assignee={card.assignee_id || "Unassigned"}

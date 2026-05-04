@@ -161,9 +161,9 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProject.fulfilled, (state, action) => {
         const payloadProject = action.payload as Project;
-        const projectId = payloadProject._id ?? payloadProject.id;
+        const projectId = payloadProject._id;
         const index = state.projects.findIndex(
-          (p) => (p._id ?? p.id) === projectId,
+          (p) => p._id === projectId,
         );
         if (index !== -1) {
           state.projects[index] = action.payload;
