@@ -10,6 +10,12 @@ const initialState: ProjectState = {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+const normalizeStatusForApi = (status: string): string => {
+  const normalized = status.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (normalized === "inprogress") return "in_progress";
+  return normalized;
+};
+
 // --- Thunks ---
 
 export const fetchProjects = createAsyncThunk(
@@ -58,13 +64,18 @@ export const updateProject = createAsyncThunk(
     const session = await getSession();
     const token = session?.user?.accessToken;
     if (!token) return rejectWithValue("No access token");
+    const normalizedUpdates =
+      typeof updates.status === "string"
+        ? { ...updates, status: normalizeStatusForApi(updates.status) }
+        : updates;
+
     const res = await fetch(`${API_BASE}/api/v1/projects/${projectId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(updates),
+      body: JSON.stringify(normalizedUpdates),
     });
     const data = await res.json();
     if (!res.ok) return rejectWithValue(data.detail);

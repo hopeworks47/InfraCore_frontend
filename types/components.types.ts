@@ -20,6 +20,7 @@ export interface ProjectModalProps {
     isOpen: boolean;
     onClose: () => void;
     project?: Project | null;
+    onStatusChange?: (status: string) => void;
 }
 
 export interface NewProjectModalProps {

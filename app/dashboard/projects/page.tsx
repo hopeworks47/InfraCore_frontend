@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
@@ -24,18 +24,23 @@ export default function ProjectsPage() {
         dispatch(fetchProjects());
     }, [dispatch]);
 
+    const normalizeStatus = (status: string) =>
+        status.trim().toLowerCase().replace(/[\s_-]+/g, "");
+
     const columnsFromProjects = useMemo(() => {
         const groups = [
-            { title: "Todo", predicate: (status: string) => status.includes("todo") },
-            { title: "In Progress", predicate: (status: string) => status.includes("progress") },
-            { title: "QA", predicate: (status: string) => status.includes("qa") },
-            { title: "Complete", predicate: (status: string) => status.includes("complete") },
-            { title: "Done", predicate: (status: string) => status.includes("done") },
+            { title: "Todo", statusValue: "todo" },
+            { title: "In Progress", statusValue: "in_progress" },
+            { title: "QA", statusValue: "qa" },
+            { title: "Complete", statusValue: "complete" },
+            { title: "Done", statusValue: "done" },
         ];
 
-        return groups.map(({ title, predicate }) => ({
+        return groups.map(({ title, statusValue }) => ({
             title,
-            cards: projects.filter((project) => predicate(project.status.toLowerCase())),
+            cards: projects.filter(
+                (project) => normalizeStatus(project.status) === normalizeStatus(statusValue),
+            ),
         }));
     }, [projects]);
 
@@ -65,13 +70,21 @@ export default function ProjectsPage() {
             return;
         }
 
+        const statusByColumnTitle: Record<string, string> = {
+            Todo: "todo",
+            "In Progress": "in_progress",
+            QA: "qa",
+            Complete: "complete",
+            Done: "done",
+        };
+        const targetStatus = statusByColumnTitle[targetColumn] || targetColumn;
         const draggedId = draggedCard.card._id;
 
         if (draggedId) {
             // Find the current project and create full updated project
             const currentProject = projects.find((p) => p._id === draggedId);
             if (currentProject) {
-                const updatedProject = { ...currentProject, status: targetColumn };
+                const updatedProject = { ...currentProject, status: targetStatus };
                 dispatch(updateProject({ projectId: draggedId, updates: updatedProject }));
             }
         } else {
@@ -88,7 +101,7 @@ export default function ProjectsPage() {
                     return currentColumns;
                 }
 
-                const movedCard = { ...cardToMove, status: targetColumn };
+                const movedCard = { ...cardToMove, status: targetStatus };
 
                 return currentColumns.map((column) => {
                     if (column.title === draggedCard.fromColumn) {
@@ -154,9 +167,33 @@ export default function ProjectsPage() {
         handleNewProjectClose();
     };
 
+    const handleProjectStatusChange = (status: string) => {
+        if (!selectedProject) {
+            return;
+        }
+
+        setSelectedProject((currentProject) =>
+            currentProject ? { ...currentProject, status } : currentProject,
+        );
+
+        if (selectedProject._id) {
+            dispatch(
+                updateProject({
+                    projectId: selectedProject._id,
+                    updates: { ...selectedProject, status },
+                }),
+            );
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <ProjectModal isOpen={Boolean(selectedProject)} project={selectedProject} onClose={closeModal} />
+            <ProjectModal
+                isOpen={Boolean(selectedProject)}
+                project={selectedProject}
+                onClose={closeModal}
+                onStatusChange={handleProjectStatusChange}
+            />
             <NewProjectModal isOpen={isNewProjectModalOpen} onClose={handleNewProjectClose} onSubmit={handleNewProjectSubmit} />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>

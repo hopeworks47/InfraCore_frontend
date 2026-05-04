@@ -2,10 +2,24 @@
 
 import type { ProjectModalProps } from "@/types/components.types";
 
-export default function ProjectModal({ isOpen, project, onClose }: ProjectModalProps) {
+const statusOptions = [
+    { value: "todo", label: "Todo" },
+    { value: "in_progress", label: "In Progress" },
+    { value: "qa", label: "QA" },
+    { value: "complete", label: "Complete" },
+    { value: "done", label: "Done" },
+];
+
+export default function ProjectModal({ isOpen, project, onClose, onStatusChange }: ProjectModalProps) {
     if (!isOpen || !project) {
         return null;
     }
+
+    const normalizedStatusValue = project.status
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_")
+        .replace("inprogress", "in_progress");
 
     const attachmentImages = (() => {
         if (!project.attachments) {
@@ -44,12 +58,6 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                         <div className="mb-6">
                             <h1 className="text-2xl font-bold text-slate-900">{project.title}</h1>
                             <p className="text-sm text-slate-500 mt-1">{project.task_type}</p>
-                        </div>
-
-                        <div className="mb-6">
-                            <button className="inline-block rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
-                                {project.status}
-                            </button>
                         </div>
 
                         <div className="mb-8">
@@ -121,6 +129,21 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                                 <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-4">Details</h3>
 
                                 <div className="space-y-5">
+                                    <div>
+                                        <label className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2 block">Status</label>
+                                        <select
+                                            value={normalizedStatusValue}
+                                            onChange={(event) => onStatusChange?.(event.target.value)}
+                                            className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                        >
+                                            {statusOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
                                     <div>
                                         <label className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2 block">Assignee</label>
                                         <div className="flex items-center justify-between">
