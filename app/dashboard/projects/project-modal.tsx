@@ -7,6 +7,27 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
         return null;
     }
 
+    const attachmentImages = (() => {
+        if (!project.attachments) {
+            return [];
+        }
+
+        if (Array.isArray(project.attachments)) {
+            return project.attachments
+                .map((value) => String(value).trim())
+                .filter(Boolean);
+        }
+
+        if (typeof project.attachments === "string") {
+            return project.attachments
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean);
+        }
+
+        return [];
+    })();
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={onClose}>
             <div className="w-full max-w-5xl overflow-hidden bg-white shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
@@ -31,13 +52,24 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                             </button>
                         </div>
 
-                        <div className="flex gap-2 mb-8">
-                            <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50 transition">
-                                📎 Attach
-                            </button>
-                            <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-md hover:bg-slate-50 transition">
-                                🔗 Link issue
-                            </button>
+                        <div className="mb-8">
+                            <label className="block text-sm font-semibold text-slate-900 mb-3">Attachments</label>
+                            {attachmentImages.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {attachmentImages.map((url, index) => (
+                                        <div key={`${url}-${index}`} className="overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`}
+                                                alt={`Attachment ${index + 1}`}
+                                                className="h-24 w-full object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-slate-500">No attachments</p>
+                            )}
                         </div>
 
                         <div className="mb-8">

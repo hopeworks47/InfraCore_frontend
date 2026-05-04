@@ -14,7 +14,7 @@ export interface Project {
   assignee_id?: string;
   due_date?: string;
   status: string;
-  attachment?: string;
+  attachments?: string | string[];
   created_at: string;
   comments?: Comment[];
 }

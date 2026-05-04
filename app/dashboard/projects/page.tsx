@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
@@ -8,7 +8,7 @@ import ProjectCard from "./project-card";
 import ProjectModal from "./project-modal";
 import NewProjectModal from "./new-project-modal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProjects, fetchProject, updateProject, createProject } from "@/store/slices/projectSlice";
+import { fetchProjects, updateProject, createProject } from "@/store/slices/projectSlice";
 
 const initialColumns: BoardColumn[] = [];
 
@@ -114,20 +114,7 @@ export default function ProjectsPage() {
     };
 
     const handleCardClick = (card: Project) => {
-        const projectId = card._id;
-        if (!projectId) {
-            setSelectedProject(card);
-            return;
-        }
-
-        dispatch(fetchProject(projectId))
-            .unwrap()
-            .then((project: Project) => {
-                setSelectedProject(project);
-            })
-            .catch(() => {
-                setSelectedProject(card);
-            });
+        setSelectedProject(card);
     };
 
     const closeModal = () => {
