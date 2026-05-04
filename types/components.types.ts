@@ -1,5 +1,5 @@
 import type { DragEvent, ReactNode } from "react";
-import type { ProjectItem, ProjectFormData } from "./project.types";
+import type { Project } from "./project.types";
 
 // Props types for components
 export interface ProvidersProps {
@@ -19,13 +19,13 @@ export interface ProjectCardProps {
 export interface ProjectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    project?: ProjectItem | null;
+    project?: Project | null;
 }
 
 export interface NewProjectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (project: ProjectFormData) => void;
+    onSubmit?: (project: Project) => void;
 }
 
 export interface NewProjectButtonProps {

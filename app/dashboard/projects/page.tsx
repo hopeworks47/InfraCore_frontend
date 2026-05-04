@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
-import type { Project, ProjectItem, BoardColumn } from "@/types/project.types";
+import type { Project, BoardColumn } from "@/types/project.types";
 import NewProjectButton from "./new-project-button";
 import ProjectCard from "./project-card";
 import ProjectModal from "./project-modal";
@@ -14,8 +14,8 @@ const initialColumns: BoardColumn[] = [];
 
 export default function ProjectsPage() {
     const [localColumns, setLocalColumns] = useState<BoardColumn[]>((initialColumns as BoardColumn[]));
-    const [draggedCard, setDraggedCard] = useState<{ fromColumn: string; card: ProjectItem & { id?: string } } | null>(null);
-    const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+    const [draggedCard, setDraggedCard] = useState<{ fromColumn: string; card: Project } | null>(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
     const dispatch = useAppDispatch();
     const projects = useAppSelector((state) => state.projects.projects);
@@ -24,18 +24,7 @@ export default function ProjectsPage() {
         dispatch(fetchProjects());
     }, [dispatch]);
 
-    const convertProjectToCard = (project: Project): ProjectItem & { id: string } => ({
-        id: project._id ?? project.id ?? project.title,
-        title: project.title,
-        type: project.task_type || project.priority || "Task",
-        assignee: project.assignee_id || "Unassigned",
-        due: project.due_date || "No due date",
-        status: project.status || "Todo",
-        description: project.description,
-    });
-
     const columnsFromProjects = useMemo(() => {
-        const cards = projects.map(convertProjectToCard);
         const groups = [
             { title: "Todo", predicate: (status: string) => status.includes("todo") },
             { title: "In Progress", predicate: (status: string) => status.includes("progress") },
@@ -46,16 +35,16 @@ export default function ProjectsPage() {
 
         return groups.map(({ title, predicate }) => ({
             title,
-            cards: cards.filter((card) => predicate(card.status.toLowerCase())),
+            cards: projects.filter((project) => predicate(project.status.toLowerCase())),
         }));
     }, [projects]);
 
     const columns = projects.length ? columnsFromProjects : localColumns;
 
-    const handleDragStart = (columnTitle: string, card: ProjectItem) => (event: DragEvent<HTMLDivElement>) => {
+    const handleDragStart = (columnTitle: string, card: Project) => (event: DragEvent<HTMLDivElement>) => {
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", JSON.stringify({ fromColumn: columnTitle, title: card.title }));
-        setDraggedCard({ fromColumn: columnTitle, card: card as ProjectItem & { id?: string } });
+        setDraggedCard({ fromColumn: columnTitle, card });
     };
 
     const handleDragEnd = () => {
@@ -76,12 +65,14 @@ export default function ProjectsPage() {
             return;
         }
 
-        if (draggedCard.card.id) {
+        const draggedId = draggedCard.card._id ?? draggedCard.card.id;
+
+        if (draggedId) {
             // Find the current project and create full updated project
-            const currentProject = projects.find(p => (p._id ?? p.id) === draggedCard.card.id);
+            const currentProject = projects.find((p) => (p._id ?? p.id) === draggedId);
             if (currentProject) {
                 const updatedProject = { ...currentProject, status: targetColumn };
-                dispatch(updateProject({ projectId: draggedCard.card.id, updates: updatedProject }));
+                dispatch(updateProject({ projectId: draggedId, updates: updatedProject }));
             }
         } else {
             // Update local columns
@@ -122,16 +113,17 @@ export default function ProjectsPage() {
         setDraggedCard(null);
     };
 
-    const handleCardClick = (card: ProjectItem & { id?: string }) => {
-        if (!card.id) {
+    const handleCardClick = (card: Project) => {
+        const projectId = card._id ?? card.id;
+        if (!projectId) {
             setSelectedProject(card);
             return;
         }
 
-        dispatch(fetchProject(card.id))
+        dispatch(fetchProject(projectId))
             .unwrap()
             .then((project: Project) => {
-                setSelectedProject(convertProjectToCard(project));
+                setSelectedProject(project);
             })
             .catch(() => {
                 setSelectedProject(card);
@@ -150,16 +142,18 @@ export default function ProjectsPage() {
         setIsNewProjectModalOpen(false);
     };
 
-    const handleNewProjectSubmit = (project: Omit<ProjectItem, "id">) => {
+    const handleNewProjectSubmit = (project: Project) => {
         if (projects.length > 0) {
             // Dispatch createProject to store
             const formData = new FormData();
             formData.append('title', project.title);
             formData.append('description', project.description || '');
-            formData.append('task_type', project.type);
-            formData.append('priority', 'Medium'); // default
-            formData.append('status', 'Todo');
-            formData.append('due_date', project.due);
+            formData.append('task_type', project.task_type);
+            formData.append('priority', project.priority);
+            formData.append('status', project.status);
+            if (project.due_date) {
+                formData.append('due_date', project.due_date);
+            }
             // assignee_id if needed
             dispatch(createProject(formData));
         } else {
@@ -210,11 +204,11 @@ export default function ProjectsPage() {
                             <div className="space-y-4">
                                 {column.cards.map((card) => (
                                     <ProjectCard
-                                        key={`${column.title}-${card.title}`}
+                                        key={`${column.title}-${card._id ?? card.id ?? card.title}`}
                                         title={card.title}
-                                        type={card.type}
-                                        assignee={card.assignee}
-                                        due={card.due}
+                                        type={card.task_type}
+                                        assignee={card.assignee_id || "Unassigned"}
+                                        due={card.due_date || "No due date"}
                                         onClick={() => handleCardClick(card)}
                                         onDragStart={handleDragStart(column.title, card)}
                                         onDragEnd={handleDragEnd}

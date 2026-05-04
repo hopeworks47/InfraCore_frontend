@@ -5,7 +5,7 @@ export interface Comment {
     created_at: string;
 }
 
-export interface Project {
+export interface Project {  
   _id?: string;
   id?: string;
   title: string;
@@ -20,27 +20,9 @@ export interface Project {
   comments?: Comment[];
 }
 
-export interface ProjectItem {
-    title: string;
-    type: string;
-    assignee: string;
-    due: string;
-    status: string;
-    description?: string;
-}
-
 export interface BoardColumn {
     title: string;
-    cards: ProjectItem[];
-}
-
-export interface ProjectFormData {
-    title: string;
-    type: string;
-    assignee: string;
-    due: string;
-    status: string;
-    description: string;
+    cards: Project[];
 }
 
 export interface ProjectState {

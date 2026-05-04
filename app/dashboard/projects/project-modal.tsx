@@ -22,7 +22,7 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                     <div className="flex-1 border-r border-slate-200 p-6 overflow-y-auto">
                         <div className="mb-6">
                             <h1 className="text-2xl font-bold text-slate-900">{project.title}</h1>
-                            <p className="text-sm text-slate-500 mt-1">{project.type}</p>
+                            <p className="text-sm text-slate-500 mt-1">{project.task_type}</p>
                         </div>
 
                         <div className="mb-6">
@@ -92,7 +92,7 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
                                     <div>
                                         <label className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2 block">Assignee</label>
                                         <div className="flex items-center justify-between">
-                                            <p className="text-sm text-slate-600">Unassigned</p>
+                                            <p className="text-sm text-slate-600">{project.assignee_id || "Unassigned"}</p>
                                             <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">Assign to me</button>
                                         </div>
                                     </div>
@@ -112,7 +112,7 @@ export default function ProjectModal({ isOpen, project, onClose }: ProjectModalP
 
                                     <div>
                                         <label className="text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2 block">Due date</label>
-                                        <p className="text-sm text-slate-600">{project.due}</p>
+                                        <p className="text-sm text-slate-600">{project.due_date || "No due date"}</p>
                                     </div>
 
                                     <div className="border-t border-slate-200 pt-4">
