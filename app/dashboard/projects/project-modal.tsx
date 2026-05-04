@@ -44,7 +44,10 @@ export default function ProjectModal({ isOpen, project, onClose, onStatusChange 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={onClose}>
-            <div className="w-full max-w-5xl overflow-hidden bg-white shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="relative w-full max-w-5xl max-h-[calc(100vh-2rem)] overflow-hidden bg-white shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button
                     type="button"
                     onClick={onClose}
@@ -52,9 +55,9 @@ export default function ProjectModal({ isOpen, project, onClose, onStatusChange 
                 >
                     ✕
                 </button>
-                <div className="flex h-[600px]">
+                <div className="flex h-full min-h-0">
                     {/* Left Panel */}
-                    <div className="flex-1 border-r border-slate-200 p-6 overflow-y-auto">
+                    <div className="min-h-0 flex-1 overflow-y-auto border-r border-slate-200 p-6">
                         <div className="mb-6">
                             <h1 className="text-2xl font-bold text-slate-900">{project.title}</h1>
                             <p className="text-sm text-slate-500 mt-1">{project.task_type}</p>
@@ -90,7 +93,7 @@ export default function ProjectModal({ isOpen, project, onClose, onStatusChange 
                         <div className="mb-8">
                             <label className="block text-sm font-semibold text-slate-900 mb-3">Priority</label>
                             <div className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-md bg-slate-50 text-sm font-medium text-slate-700">
-                                🟡 Medium
+                                {project.priority}
                             </div>
                         </div>
 
@@ -115,11 +118,10 @@ export default function ProjectModal({ isOpen, project, onClose, onStatusChange 
                     </div>
 
                     {/* Right Panel */}
-                    <div className="w-80 bg-slate-50 border-l border-slate-200 p-6 overflow-y-auto">
+                    <div className="min-h-0 w-80 overflow-y-auto border-l border-slate-200 bg-slate-50 p-6">
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pinned fields</p>
-                                <button type="button" className="text-slate-400 hover:text-slate-600">✕</button>
                             </div>
                             <p className="text-xs text-slate-500">Click on the ⭐ next to a field label to start pinning.</p>
                         </div>
