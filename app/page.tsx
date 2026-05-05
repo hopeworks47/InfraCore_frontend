@@ -5,6 +5,7 @@ import HomeUI from "./components/HomeUI"
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
+  const isAuthenticated = Boolean(session?.user?.accessToken)
 
-  return <HomeUI isAuthenticated={!!session} />
+  return <HomeUI isAuthenticated={isAuthenticated} />
 }
