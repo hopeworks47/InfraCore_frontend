@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { DragEvent } from "react";
@@ -204,7 +204,7 @@ export default function ProjectsPage() {
             <div className="border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-5">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Job Board</p>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Board</p>
                         
                     </div>
                     <NewProjectButton onOpen={handleNewProjectOpen} />
