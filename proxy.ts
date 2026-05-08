@@ -14,8 +14,6 @@ export async function proxy(req: NextRequest) {
   const isAuthPage = pathname === '/login'
   const isProtected = pathname.startsWith('/dashboard')
 
-  // Must match app/dashboard/layout.tsx: session is only "valid" with an API access token.
-  // Otherwise /login redirects here → /dashboard while layout sends you back → redirect loop.
   const accessToken = token?.accessToken as string | undefined
   const isLoggedIn = Boolean(accessToken)
 
